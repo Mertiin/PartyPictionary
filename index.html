@@ -1,0 +1,220 @@
+﻿<!doctype html>
+<html>
+<head>
+    <title>Socket.IO chat</title>
+    <style>
+        body {
+            margin: 0px;
+            /*width: 100%;
+            height: 100%;*/
+            font-family: Arial;
+            /* prevent text selection on ui */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            /* prevent scrolling in windows phone */
+            -ms-touch-action: none;
+            /* prevent selection highlight */
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+        }
+
+        #canvas {
+            cursor: crosshair;
+            background-color: #fff;
+            border: 1px solid black;
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+
+        .colorList {
+            display: block;
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            width: 400px;
+        }
+
+            .colorList li {
+                display: inline-block;
+                border: 1px solid black;
+                height: 30px;
+                width: 70px;
+                color: #ffffff;
+                font-weight: bold;
+                font-size: 14px;
+                text-align: center;
+                padding-top: 10px;
+            }
+    </style>
+</head>
+<body>
+    <div id="content"><p style="text-align:center">Loading Canvas...</p></div>
+    <ul class="colorList">
+        <li style="background-color: #ffffff; color: #000000;">White</li>
+        <li style="background-color: #000;">Black</li>
+        <li style="background-color: #ff0000">Red</li>
+        <li style="background-color: #0000ff">Blue</li>
+        <li style="background-color: #008000">Green</li>
+        <input type="button" onclick="reset();" value="Reset" />
+    </ul>
+
+    <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script>
+        var socket = io();
+        var ctx, color = "#000";
+        var lastData = "";
+        var lastEmit = null;
+        var id = Math.round($.now() * Math.random());
+        var drawing = false;
+
+        $(document).ready(function () {
+            // setup a new canvas for drawing wait for device init
+            setTimeout(function () {
+                newCanvas();
+            }, 1000);
+
+            $(".colorList li").click(function () {
+                changeColor($(this).css("background-color"));
+            });
+        });
+
+
+        function emitMove(x, y) {
+            if ($.now() - lastEmit > 30) {
+                socket.emit('mousemove',
+                {
+                    'x': x,
+                    'y': y,
+                    'id': id,
+                    'drawing': drawing,
+                    'color': color
+                });
+                lastEmit = $.now();
+            }
+        }
+        function reset(x, y) {
+            newCanvas();
+            socket.emit('reset', true);
+        }
+
+        function changeColor(clr) {
+            color = clr;
+            ctx.beginPath();
+            ctx.strokeStyle = clr;
+        }
+
+        function newCanvas() {
+            //define and resize canvas
+            var canvas = '<canvas id="canvas" width="750px" height="750px"></canvas>';
+            $("#content").html(canvas);
+
+            // setup canvas
+            ctx = document.getElementById("canvas").getContext("2d");
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 5;
+
+            // setup to trigger drawing on mouse or touch
+            $("#canvas").drawTouch();
+            $("#canvas").drawPointer();
+            $("#canvas").drawMouse();
+        }
+
+        // prototype to	start drawing on touch using canvas moveTo and lineTo
+        $.fn.drawTouch = function () {
+            var start = function (e) {
+                var off = $("#canvas").offset();
+                e = e.originalEvent;
+                ctx.beginPath();
+                x = e.changedTouches[0].pageX - off.left;
+                y = e.changedTouches[0].pageY - off.top;
+                ctx.moveTo(x, y);
+            };
+            var move = function (e) {
+                var off = $("#canvas").offset();
+                e.preventDefault();
+                e = e.originalEvent;
+                x = e.changedTouches[0].pageX - off.left;
+                y = e.changedTouches[0].pageY - off.top;
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                drawing = true;
+                emitMove(x, y);
+                drawing = false;
+            };
+            var stop = function () {
+                drawing = false;
+            }
+            $(this).on("touchstart", start);
+            $(this).on("touchmove", move);
+            $(this).on("touchend", stop);
+
+        };
+
+        // prototype to	start drawing on pointer(microsoft ie) using canvas moveTo and lineTo
+        $.fn.drawPointer = function () {
+            var start = function (e) {
+                var off = $("#canvas").offset();
+                e = e.originalEvent;
+                ctx.beginPath();
+                x = e.pageX - off.left;
+                y = e.pageY - off.top;
+                ctx.moveTo(x, y);
+            };
+            var move = function (e) {
+                var off = $("#canvas").offset();
+                e.preventDefault();
+                e = e.originalEvent;
+                x = e.pageX - off.left;
+                y = e.pageY - off.top;
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                drawing = true;
+                emitMove(x, y);
+            };
+            var stop = function () {
+                drawing = false;
+            }
+            $(this).on("MSPointerDown", start);
+            $(this).on("MSPointerMove", move);
+            $(this).on("MSPointerUpp", stop);
+        };
+        // prototype to	start drawing on mouse using canvas moveTo and lineTo
+        $.fn.drawMouse = function () {
+            var clicked = 0;
+            var start = function (e) {
+                var off = $("#canvas").offset();
+                clicked = 1;
+                ctx.beginPath();
+                x = e.pageX - off.left;
+                y = e.pageY - off.top;
+                ctx.moveTo(x, y);
+            };
+            var move = function (e) {
+                var off = $("#canvas").offset();
+                console.log({ x: e.pageX, y: e.pageY });
+                x = e.pageX - off.left;
+                y = e.pageY - off.top;
+                if (clicked) {
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                    drawing = true;
+                }
+                emitMove(x, y);
+            };
+            var stop = function (e) {
+                drawing = false;
+                clicked = 0;
+            };
+            $(this).on("mousedown", start);
+            $(this).on("mousemove", move);
+            $(window).on("mouseup", stop);
+        };
+    </script>
+</body>
+</html>
