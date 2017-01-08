@@ -1,2 +1,6 @@
 # Build results
 node_modules
+
+# Visual Studios stuff
+vs/
+typings/

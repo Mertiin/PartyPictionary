@@ -1,123 +1,17 @@
 ﻿<!doctype html>
 <html>
 <head>
-    <title>Socket.IO chat</title>
-    <style>
-        body {
-            margin: 0px;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial;
-            /* prevent text selection on ui */
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            /* prevent scrolling in windows phone */
-            -ms-touch-action: none;
-            /* prevent selection highlight */
-            -webkit-tap-highlight-color: rgba(0,0,0,0);
-        }
-
-        #canvas {
-            cursor: crosshair;
-            background-color: #fff;
-            border: 1px solid black;
-            padding-left: 0;
-            padding-right: 0;
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
-        }
-    </style>
+    <title>Socket.IO Server</title>
+    <link href="content/css/style.css" rel="stylesheet" />
 </head>
 <body>
     <h1>Server</h1>
     <div id="content">
         <p style="text-align: center">Loading Canvas...</p>
     </div>
-
+    <ul id="userList"></ul>
     <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script>
-        var socket = io();
-        var ctx, color = "#000";
-        var clients = {};
-        var lastDraw = $.now();
-
-        $(document).ready(function () {
-            // setup a new canvas for drawing wait for device init
-            setTimeout(function () {
-                newCanvas();
-            }, 1000);
-            setInterval(function () {
-                for (ident in clients) {
-                    if ($.now() - clients[ident].updated > 10000) {
-
-                        // Last update was more than 10 seconds ago.
-                        // This user has probably closed the page
-
-                        cursors[ident].remove();
-                        delete clients[ident];
-                        delete cursors[ident];
-                    }
-                }
-            }, 10000);
-        });
-
-        socket.on('moving', function (data) {
-            console.log('moving re');
-            // Is the user drawing?
-            if (data.drawing && clients[data.id]) {
-
-                // Draw a line on the canvas. clients[data.id] holds
-                // the previous position of this user's mouse pointer
-                if (data.color != color)
-                    changeColor(data.color);
-                drawLine(clients[data.id].x, clients[data.id].y, data.x, data.y);
-            }
-
-            // Saving the current client state
-            clients[data.id] = data;
-            clients[data.id].updated = $.now();
-        });
-
-        socket.on('reset', function () {
-            newCanvas();
-        });
-
-        function changeColor(clr) {
-            color = clr;
-            ctx.beginPath();
-            ctx.strokeStyle = clr;
-        }
-
-        function drawLine(fromx, fromy, tox, toy) {
-            console.log($.now() - lastDraw);
-            if ($.now() - lastDraw > 100) {
-                fromx = tox;
-                fromy = toy;
-            }
-            ctx.moveTo(fromx, fromy);
-            ctx.lineTo(tox, toy);
-            ctx.stroke();
-            lastDraw = $.now();
-        }
-
-        function newCanvas() {
-            //define and resize canvas
-            $("#content").height($(window).height() - 90);
-            var canvas = '<canvas id="canvas" width="750px" height="750px"></canvas>';
-            $("#content").html(canvas);
-
-            // setup canvas
-            ctx = document.getElementById("canvas").getContext("2d");
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 5;
-
-            // setup to trigger drawing on mouse or touch
-        }
-    </script>
+    <script src="content/js/server.js"></script>
 </body>
 </html>

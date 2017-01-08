@@ -1,0 +1,22 @@
+﻿<!doctype html>
+<html>
+<head>
+    <title>Socket.IO chat</title>
+    <link href="content/css/style.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="content"><p style="text-align:center">Loading Canvas...</p></div>
+    <ul class="colorList">
+        <li style="background-color: #ffffff; color: #000000;">White</li>
+        <li style="background-color: #000;">Black</li>
+        <li style="background-color: #ff0000">Red</li>
+        <li style="background-color: #0000ff">Blue</li>
+        <li style="background-color: #008000">Green</li>
+        <input type="button" onclick="reset();" value="Reset" />
+    </ul>
+
+    <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="content/js/client.js"></script>
+</body>
+</html>

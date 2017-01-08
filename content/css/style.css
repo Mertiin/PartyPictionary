@@ -1,0 +1,47 @@
+﻿  body {
+            margin: 0px;
+            /*width: 100%;
+            height: 100%;*/
+            font-family: Arial;
+            /* prevent text selection on ui */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            /* prevent scrolling in windows phone */
+            -ms-touch-action: none;
+            /* prevent selection highlight */
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+        }
+
+        #canvas {
+            cursor: crosshair;
+            background-color: #fff;
+            border: 1px solid black;
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+
+        .colorList {
+            display: block;
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            width: 400px;
+        }
+
+            .colorList li {
+                display: inline-block;
+                border: 1px solid black;
+                height: 30px;
+                width: 70px;
+                color: #ffffff;
+                font-weight: bold;
+                font-size: 14px;
+                text-align: center;
+                padding-top: 10px;
+            }
