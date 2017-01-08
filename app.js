@@ -23,7 +23,7 @@ app.get('/servers', function (req, res) {
     res.send(JSON.stringify(servers));
 });
 
-http.listen(3000, function () {
+http.listen(80, function () {
     console.log('listening on *:80');
 });
 

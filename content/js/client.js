@@ -28,7 +28,7 @@ socket.on("serverInfo", function(data) {
 
 
 function emitMove(x, y) {
-    if ($.now() - lastEmit > 30) {
+    if ($.now() - lastEmit > 10) {
         socket.emit('mousemove',
         {
             'x': x,
