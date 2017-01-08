@@ -1,0 +1,7 @@
+{
+  "name": "PartyPictionary",
+  "dependencies": {
+    "express": "",
+    "socket.io": "1.7.2"
+  }
+}
