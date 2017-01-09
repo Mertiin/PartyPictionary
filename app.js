@@ -12,12 +12,25 @@ app.use(express.static(__dirname));
 app.get('/', function (req, res) {
     res.sendFile('index.html', { root: __dirname });
 });
+
 app.get('/client', function (req, res) {
     res.sendFile('client.html', { root: __dirname });
 });
+
 app.get('/server', function (req, res) {
     res.sendFile('server.html', { root: __dirname });
 });
+
+app.get('/server/start', function (req, res) {
+    var id = req.query.id;
+
+    servers[id].isStarted = true;
+    console.log(servers[id]);
+
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(true));
+});
+
 app.get('/servers', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify(servers));
@@ -43,7 +56,7 @@ io.on('connection', function (socket) {
             if (servers.hasOwnProperty(user.server)) {
                 var server = servers[user.server];
                 delete server.users[userId];
-                io.sockets.connected[server.server].emit('connected', { users: server.users });
+                io.sockets.connected[server.server].emit('connected', { users: server.users, user: user });
             }
         }
 
@@ -76,7 +89,7 @@ io.on('connection', function (socket) {
             users[userId].server = data;
 
             if (io.sockets.connected[servers[data].server]) {
-                io.sockets.connected[servers[data].server].emit('connected', { users: servers[data].users });
+                io.sockets.connected[servers[data].server].emit('connected', { users: servers[data].users, user: servers[data].users[userId] });
             }
 
             console.log("connected: " + data);
@@ -106,9 +119,27 @@ io.on('connection', function (socket) {
             servers[data] = {
                 server: userId,
                 users: {},
-                started: false
+                isStarted: false
             };
             console.log("server started: " + data.toString());
+        }
+    });
+
+    socket.on("newRound", function (data) {
+        var server = servers[data.id];
+        var user;
+        for (var key in server.users) {
+            user = server.users[key];
+            user.isDrawing = false;
+        }
+
+        user = server.users[data.userId];
+        user.isDrawing = true;
+
+        socket.broadcast.to(data.id).emit("newRound", true);
+
+        if (io.sockets.connected[data.userId]) {
+            io.sockets.connected[data.userId].emit('selected', { word: data.word });
         }
     });
 });

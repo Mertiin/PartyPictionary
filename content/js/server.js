@@ -17,8 +17,45 @@ socket.emit('createServer', id);
 var ctx, color = "#000";
 var clients = {};
 var lastDraw = $.now();
+var isStarted = false;
+var users = [];
+var timer = 0;
+var word = "";
+
+setInterval(function() {
+    if (isStarted) {
+        timer--;
+        $("#time").html(timer + "");
+        if (timer <= 0) {
+            newRound();
+        }
+    }
+}, 1000);
+
+function startServer() {
+    $.get("/server/start?id=" + id, function (data) {
+        isStarted = true;
+        newRound();
+    });
+}
+
+function newRound() {
+     word = "cat";
+    timer = 60;
+    $("#word").html(word);
+    for (var i = 0; i < users.length; i++) {
+        var user = users[i];
+        console.log(user);
+        if (user.isDone !== true) {
+            user.isDone = true;
+            socket.emit("newRound", { id: id, userId: user.id, word: word });
+            break;
+        }
+    }
+}
 
 $(document).ready(function () {
+
     // setup a new canvas for drawing wait for device init
     setTimeout(function () {
         newCanvas();
@@ -39,7 +76,7 @@ $(document).ready(function () {
 socket.on('connected', function (data) {
     console.log("connected: " + data.id);
     console.log(data);
-    
+    users.push(data.user);
     $("#userList").empty();
     for (var key in data.users) {
         if (data.users.hasOwnProperty(key)) {
@@ -50,10 +87,8 @@ socket.on('connected', function (data) {
 });
 
 socket.on('moving', function (data) {
-    console.log('moving re');
     // Is the user drawing?
     if (data.drawing && clients[data.id]) {
-
         // Draw a line on the canvas. clients[data.id] holds
         // the previous position of this user's mouse pointer
         if (data.color != color)
@@ -77,7 +112,6 @@ function changeColor(clr) {
 }
 
 function drawLine(fromx, fromy, tox, toy) {
-    console.log($.now() - lastDraw);
     if ($.now() - lastDraw > 100) {
         fromx = tox;
         fromy = toy;

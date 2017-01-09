@@ -6,9 +6,12 @@
 </head>
 <body>
     <h1>Server</h1>
-    <div id="content">
-        <p style="text-align: center">Loading Canvas...</p>
-    </div>
+    <h1 id="word"></h1>
+    <h1 id="time">0</h1>
+<div id="content">
+    <p style="text-align: center">Loading Canvas...</p>
+</div>
+    <input id="startServer" type="button" value="Start" onclick="startServer();"/>
     <ul id="userList"></ul>
     <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>

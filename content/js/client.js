@@ -32,6 +32,15 @@ socket.on("serverInfo", function (data) {
     }
 });
 
+socket.on("selected", function (data) {
+    $("#word").html(data.word);
+    $("#drawingSpace").show();
+});
+socket.on("newRound", function (data) {
+    $("#word").html("");
+    $("#drawingSpace").hide();
+});
+
 
 function emitMove(x, y) {
     if ($.now() - lastEmit > 10) {
