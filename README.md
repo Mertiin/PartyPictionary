@@ -7,3 +7,5 @@ To start
 2. node app.js
 
 Then you have the "server" on localhost:3000/server and the clients on localhost:3000
+
+Prod is up on http://www.playpictionary.com/
