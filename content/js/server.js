@@ -39,6 +39,7 @@ $(document).ready(function () {
 socket.on('connected', function (data) {
     console.log("connected: " + data.id);
     console.log(data);
+    
     $("#userList").empty();
     for (var key in data.users) {
         if (data.users.hasOwnProperty(key)) {

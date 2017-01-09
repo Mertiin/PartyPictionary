@@ -19,10 +19,16 @@ $(document).ready(function () {
     });
 });
 
-socket.on("serverInfo", function(data) {
+socket.on("serverInfo", function (data) {
     if (data.code === -1) {
         alert(data.message);
         window.location = "/";
+    }
+    else {
+        console.log(data);
+        if (data.data.user.isDrawing === true) {
+            $("#drawingSpace").show();
+        }
     }
 });
 

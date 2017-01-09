@@ -68,7 +68,11 @@ io.on('connection', function (socket) {
     socket.on("join", function (data) {
         if (servers.hasOwnProperty(data)) {
             socket.join(data);
-            servers[data].users[userId] = { id: userId, name: userId };
+            servers[data].users[userId] = {
+                id: userId,
+                name: userId,
+                isDrawing: false
+            };
             users[userId].server = data;
 
             if (io.sockets.connected[servers[data].server]) {
@@ -76,12 +80,22 @@ io.on('connection', function (socket) {
             }
 
             console.log("connected: " + data);
-            socket.emit("serverInfo", { code: 0, message: "Connected" });
+            socket.emit("serverInfo",
+            {
+                code: 0,
+                message: "Connected",
+                data:
+                {
+                    user: servers[data].users[userId],
+                    users: servers[data].users
+                }
+            });
         } else {
             console.log("No: " + data);
             socket.emit("serverInfo", { code: -1, message: "Failed to join server" });
         }
     });
+
 
     socket.on("createServer", function (data) {
         socket.join(data.toString());
@@ -91,7 +105,8 @@ io.on('connection', function (socket) {
 
             servers[data] = {
                 server: userId,
-                users: {}
+                users: {},
+                started: false
             };
             console.log("server started: " + data.toString());
         }
